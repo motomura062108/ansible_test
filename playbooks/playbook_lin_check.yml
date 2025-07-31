@@ -1,0 +1,5 @@
+---
+- name: Run linux service_check role
+  hosts: linux
+  roles:
+    - linux/service_check

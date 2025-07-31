@@ -1,0 +1,54 @@
+---
+- name: サービス情報を取得
+  service_facts:
+
+- name: 各サービスが稼働していることを確認
+  vars:
+    service_name: "{{ item }}"
+    service_fullname: "{{ item }}.service"
+  loop: "{{ monitored_services }}"
+  assert:
+    that:
+      - "service_fullname in ansible_facts.services"
+      - "ansible_facts.services[service_fullname].state == 'running'"
+    fail_msg: "{{ service_name }} が稼働していません。"
+    success_msg: "{{ service_name }} は稼働しています。"
+
+- name: /var/log/messages から 'error' を検索
+  changed_when: false
+  shell: "grep -i 'error' /var/log/messages | grep -v command || true"
+  register: error_log
+
+- name: errorログが存在しないことを確認
+  assert:
+    that:
+      - error_log.stdout == ""
+    fail_msg: "errorを含むログが検出されました:{{ error_log.stdout }}"
+    success_msg: "errorを含むログはありません。"
+  ignore_errors: true
+
+- name: /var/log/messages からalertを検索
+  changed_when: false
+  shell: "grep -i 'alert' /var/log/messages | grep -v command || true"
+  register: alert_log
+
+- name: alertログが存在しないことを確認
+  assert:
+    that:
+      - alert_log.stdout == ""
+    fail_msg: "alertを含むログが検出されました:{{ alert_log.stdout }}"
+    success_msg: "alertを含むログはありません。"
+  ignore_errors: true
+
+- name: /var/log/messages からemergencyを検索
+  changed_when: false
+  shell: "grep -i 'emergency' /var/log/messages | grep -v command || true"
+  register: emergency_log
+
+- name: emergencyログが存在しないことを確認
+  assert:
+    that:
+      - emergency_log.stdout == ""
+    fail_msg: "emergencyを含むログが検出されました:{{ emergency_log.stdout }}"
+    success_msg: "emergencyを含むログはありません。"
+  ignore_errors: true
