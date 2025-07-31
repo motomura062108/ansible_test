@@ -1,8 +1,10 @@
 ---
 - name: サービス情報を取得
+  become: true
   service_facts:
 
 - name: 各サービスが稼働していることを確認
+  become: true
   vars:
     service_name: "{{ item }}"
     service_fullname: "{{ item }}.service"
@@ -15,11 +17,13 @@
     success_msg: "{{ service_name }} は稼働しています。"
 
 - name: /var/log/messages から 'error' を検索
+  become: true
   changed_when: false
   shell: "grep -i 'error' /var/log/messages | grep -v command || true"
   register: error_log
 
 - name: errorログが存在しないことを確認
+  become: true
   assert:
     that:
       - error_log.stdout == ""
@@ -28,11 +32,13 @@
   ignore_errors: true
 
 - name: /var/log/messages からalertを検索
+  become: true
   changed_when: false
   shell: "grep -i 'alert' /var/log/messages | grep -v command || true"
   register: alert_log
 
 - name: alertログが存在しないことを確認
+  become: true
   assert:
     that:
       - alert_log.stdout == ""
@@ -41,11 +47,13 @@
   ignore_errors: true
 
 - name: /var/log/messages からemergencyを検索
+  become: true
   changed_when: false
   shell: "grep -i 'emergency' /var/log/messages | grep -v command || true"
   register: emergency_log
 
 - name: emergencyログが存在しないことを確認
+  become: true
   assert:
     that:
       - emergency_log.stdout == ""
