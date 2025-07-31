@@ -1,5 +1,0 @@
-monitored_services:
-  - auditd
-  - chronyd
-  - sshd
-
